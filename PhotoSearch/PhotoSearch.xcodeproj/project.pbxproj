@@ -6,8 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D2B2464E2D3CD738008A93FB /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = D2B2464D2D3CD738008A93FB /* .gitignore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		D2B246252D3BF7FF008A93FB /* PhotoSearch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhotoSearch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2B2464D2D3CD738008A93FB /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -45,6 +50,7 @@
 		D2B2461C2D3BF7FF008A93FB = {
 			isa = PBXGroup;
 			children = (
+				D2B2464D2D3CD738008A93FB /* .gitignore */,
 				D2B246272D3BF7FF008A93FB /* PhotoSearch */,
 				D2B246262D3BF7FF008A93FB /* Products */,
 			);
@@ -122,6 +128,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D2B2464E2D3CD738008A93FB /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,0 +1,15 @@
+# Created by https://www.toptal.com/developers/gitignore/api/macos,xcode
+# Edit at https://www.toptal.com/developers/gitignore?templates=macos,xcode
+
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+### API ###
+APIKey.swift
+
+### Xcode ###
+## User settings
+xcuserdata/
