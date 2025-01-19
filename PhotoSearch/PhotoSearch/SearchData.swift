@@ -9,6 +9,7 @@ import Foundation
 // MARK: - SearchData
 struct SearchData: Decodable {
     let total: Int
+    let total_pages: Int
     let results: [Result]
 }
 

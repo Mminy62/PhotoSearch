@@ -14,7 +14,11 @@ class ViewController: BaseViewController, UISearchBarDelegate {
     
     let searchBar = UISearchBar()
     lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createCollectionLayout())
-    var dataList: [Result]?
+    var dataList: [Result] = []
+    var page: Int = 1
+    var isEnd: Bool = false
+    var searchItem: String?
+    
     
     var activityIndicator = UIActivityIndicatorView()
     
@@ -23,6 +27,7 @@ class ViewController: BaseViewController, UISearchBarDelegate {
         collectionView.register(SearchImageCollectionViewCell.self, forCellWithReuseIdentifier: SearchImageCollectionViewCell.id)
         collectionView.delegate = self
         collectionView.dataSource = self
+        collectionView.prefetchDataSource = self
         callRequest()
     }
     
@@ -49,13 +54,6 @@ class ViewController: BaseViewController, UISearchBarDelegate {
     override func configureView() {
         searchBar.placeholder = "키워드 검색"
         searchBar.searchBarStyle = .minimal
-        
-        // placeholder - activityIndicator
-//        activityIndicator.color = .white
-//        activityIndicator.hidesWhenStopped = true
-//        activityIndicator.style = .medium // 사이즈 조절
-//        activityIndicator.stopAnimating()
-//        activityIndicator.center = .zero
     }
     
     func createCollectionLayout() -> UICollectionViewFlowLayout {
@@ -72,19 +70,21 @@ class ViewController: BaseViewController, UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         view.endEditing(true)
-        // 통신
     }
     
     func callRequest() {
-        let url = "https://api.unsplash.com/search/photos?query=flower&page=1&per_page=20&order_by=latest&color=yellow&client_id=\(APIKey.search.value)"
+        let url = "https://api.unsplash.com/search/photos?query=flower&page=\(page)&per_page=20&order_by=latest&color=yellow&client_id=\(APIKey.search.value)"
         
         AF.request(url, method: .get)
             .responseDecodable(of: SearchData.self) { response in
                 switch response.result {
                     
                 case .success(let value):
-//                    dump(value)
-                    self.dataList = value.results
+                    if value.total_pages == self.page { self.isEnd = true }
+                    if self.page == 1 {
+                        self.dataList.removeAll()
+                    }
+                    self.dataList.append(contentsOf: value.results)
                     self.collectionView.reloadData()
                 case .failure(let error):
                     print(error)
@@ -96,15 +96,29 @@ class ViewController: BaseViewController, UISearchBarDelegate {
 
 extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        self.dataList?.count ?? 1
+        self.dataList.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SearchImageCollectionViewCell.id, for: indexPath) as! SearchImageCollectionViewCell
-        guard let item = self.dataList?[indexPath.item] else { return cell }
+        let item = self.dataList[indexPath.item]
         
         cell.configureData(item: item)
         return cell
         
+    }
+
+
+}
+
+
+extension ViewController: UICollectionViewDataSourcePrefetching {
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        for item in indexPaths {
+            if !isEnd && item.row == dataList.count - 2 {
+                page += 1
+                callRequest()
+            }
+        }
     }
 }
