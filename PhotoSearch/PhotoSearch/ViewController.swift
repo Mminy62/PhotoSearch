@@ -17,18 +17,18 @@ class ViewController: BaseViewController, UISearchBarDelegate {
     var dataList: [Result] = []
     var page: Int = 1
     var isEnd: Bool = false
-    var searchItem: String?
-    
-    
+    var searchItem: String? = nil
     var activityIndicator = UIActivityIndicatorView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.register(SearchImageCollectionViewCell.self, forCellWithReuseIdentifier: SearchImageCollectionViewCell.id)
+        collectionView.register(EmptyCollectionViewCell.self, forCellWithReuseIdentifier: EmptyCollectionViewCell.id)
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.prefetchDataSource = self
-        callRequest()
+        searchBar.delegate = self
+        navigationItem.title = "SEARCH PHOTO"
     }
     
     override func configureHierachy() {
@@ -52,6 +52,7 @@ class ViewController: BaseViewController, UISearchBarDelegate {
     }
     
     override func configureView() {
+        view.backgroundColor = .white
         searchBar.placeholder = "키워드 검색"
         searchBar.searchBarStyle = .minimal
     }
@@ -69,46 +70,49 @@ class ViewController: BaseViewController, UISearchBarDelegate {
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        print(#function)
+        if searchBar.text?.trimmingCharacters(in: .whitespaces).count != 0 {
+            searchItem = searchBar.text!
+            print(searchItem!)
+        }
+        if searchItem != nil {
+            callRequest()
+        }
         view.endEditing(true)
     }
     
     func callRequest() {
-        let url = "https://api.unsplash.com/search/photos?query=flower&page=\(page)&per_page=20&order_by=latest&color=yellow&client_id=\(APIKey.search.value)"
-        
-        AF.request(url, method: .get)
-            .responseDecodable(of: SearchData.self) { response in
-                switch response.result {
-                    
-                case .success(let value):
-                    if value.total_pages == self.page { self.isEnd = true }
-                    if self.page == 1 {
-                        self.dataList.removeAll()
-                    }
-                    self.dataList.append(contentsOf: value.results)
-                    self.collectionView.reloadData()
-                case .failure(let error):
-                    print(error)
-                }
+        NetworkManager.shared.callSearchAPI(searchItem!, page) { value in
+            if value.total == 0 { self.dataList.removeAll() }
+            if value.total_pages == self.page { self.isEnd = true }
+            if self.page == 1 {
+                self.dataList.removeAll()
             }
+            self.dataList.append(contentsOf: value.results)
+            self.collectionView.reloadData()
+        }
     }
     
 }
 
 extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        self.dataList.count
+        self.dataList.isEmpty ? 1 : self.dataList.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SearchImageCollectionViewCell.id, for: indexPath) as! SearchImageCollectionViewCell
-        let item = self.dataList[indexPath.item]
         
-        cell.configureData(item: item)
-        return cell
-        
+        if self.dataList.isEmpty {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EmptyCollectionViewCell.id, for: indexPath) as! EmptyCollectionViewCell
+            cell.configureData(itemFlag: searchItem != nil)
+            return cell
+        } else {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SearchImageCollectionViewCell.id, for: indexPath) as! SearchImageCollectionViewCell
+            let item = self.dataList[indexPath.item]
+            cell.configureData(item: item)
+            return cell
+        }
     }
-
-
 }
 
 
