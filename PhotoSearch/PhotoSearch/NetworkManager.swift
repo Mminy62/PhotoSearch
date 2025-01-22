@@ -13,8 +13,8 @@ class NetworkManager {
     
     private init() { }
 
-    func callSearchAPI(_ searchItem: String, _ page: Int, completionHandler: @escaping (SearchData) -> ()) {
-        let url = "https://api.unsplash.com/search/photos?query=\(searchItem)&page=\(page)&per_page=20&order_by=latest&client_id=\(APIKey.search.value)"
+    func callSearchAPI(_ searchItem: String, _ page: Int, _ sortType: SearchSort, completionHandler: @escaping (SearchData) -> ()) {
+        let url = "https://api.unsplash.com/search/photos?query=\(searchItem)&page=\(page)&per_page=20&order_by=\(sortType.query)&client_id=\(APIKey.search.value)"
         
         AF.request(url, method: .get)
             .responseDecodable(of: SearchData.self) { response in

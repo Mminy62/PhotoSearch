@@ -27,6 +27,7 @@ struct Result: Decodable {
 struct Urls: Decodable {
     let raw: String
     let small: String
+    let thumb: String
 }
 
 // MARK: - User

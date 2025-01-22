@@ -18,10 +18,11 @@ class EmptyCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(titleLabel)
         
         titleLabel.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.size.equalToSuperview()
+            
         }
-        
         titleLabel.textAlignment = .center
+        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
     }
     
     required init?(coder: NSCoder) {

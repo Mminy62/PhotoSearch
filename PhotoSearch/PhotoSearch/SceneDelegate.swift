@@ -16,8 +16,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let scene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: scene) // 빈 유리판
-        let nav = UINavigationController(rootViewController: ViewController())
-        window?.rootViewController = nav
+        let tab = UITabBarController()
+        let view01 = ViewController()
+        let view02 = TopicViewController()
+//        let nav = UINavigationController(rootViewController: ViewController())
+        window?.rootViewController = tab
+        tab.setViewControllers([view01, view02], animated: true)
+        view01.tabBarItem = UITabBarItem(title: "첫 번째 아이템", image: UIImage(named: "img.png"), tag: 0)
+        view02.tabBarItem = UITabBarItem(title: "두 번째 아이템", image: UIImage(named: "img.png"), tag: 1)
+        tab.tabBar.backgroundColor = .gray
         window?.makeKeyAndVisible() // 화면에 안보이는 오류 방지
     }
     

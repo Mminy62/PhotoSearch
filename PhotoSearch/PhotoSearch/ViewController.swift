@@ -13,12 +13,14 @@ import Kingfisher
 class ViewController: BaseViewController, UISearchBarDelegate {
     
     let searchBar = UISearchBar()
+    let sortButton = UIButton()
     lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createCollectionLayout())
     var dataList: [Result] = []
     var page: Int = 1
     var isEnd: Bool = false
+    var isRecent: Bool = false
     var searchItem: String? = nil
-    var activityIndicator = UIActivityIndicatorView()
+    var sortType: SearchSort = .accurate
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,7 +36,7 @@ class ViewController: BaseViewController, UISearchBarDelegate {
     override func configureHierachy() {
         view.addSubview(searchBar)
         view.addSubview(collectionView)
-        view.addSubview(activityIndicator)
+        view.addSubview(sortButton)
     }
     
     override func configureLayout() {
@@ -43,10 +45,13 @@ class ViewController: BaseViewController, UISearchBarDelegate {
             make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
             make.horizontalEdges.equalToSuperview().inset(10)
         }
-        
+        sortButton.snp.makeConstraints { make in
+            make.top.equalTo(searchBar.snp.bottom).offset(10)
+            make.trailing.equalTo(view.safeAreaLayoutGuide).offset(-20)
+        }
         collectionView.snp.makeConstraints { make in
             make.horizontalEdges.equalToSuperview()
-            make.top.equalTo(searchBar.snp.bottom).offset(20)
+            make.top.equalTo(sortButton.snp.bottom).offset(20)
             make.bottom.equalToSuperview()
         }
     }
@@ -55,6 +60,22 @@ class ViewController: BaseViewController, UISearchBarDelegate {
         view.backgroundColor = .white
         searchBar.placeholder = "키워드 검색"
         searchBar.searchBarStyle = .minimal
+        sortButton.setTitle(sortType.title, for: .normal)
+        sortButton.setTitleColor(.black, for: .normal)
+        sortButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        sortButton.layer.borderWidth = 1
+        sortButton.layer.borderColor = UIColor.black.cgColor
+        sortButton.layer.cornerRadius = 10
+        sortButton.addTarget(self, action: #selector(sortButtonTapped), for: .touchUpInside)
+    }
+    
+    @objc func sortButtonTapped(_ sender: UIButton) {
+        dataList.removeAll()
+        callRequest()
+        isRecent.toggle()
+        sortType = isRecent ? .latest : .accurate
+        sortButton.setTitle(sortType.title, for: .normal)
+        collectionView.scrollsToTop = true
     }
     
     func createCollectionLayout() -> UICollectionViewFlowLayout {
@@ -63,32 +84,39 @@ class ViewController: BaseViewController, UISearchBarDelegate {
         let screenHeight = UIScreen.main.bounds.height
         let screenWidth = UIScreen.main.bounds.width
         let cellSpcing = 5.0
-        layout.itemSize = CGSize(width: (screenWidth / 2) - (cellSpcing / 2.0), height: screenHeight / 3)
+        if searchItem == nil {
+            layout.itemSize = CGSize(width: screenWidth, height: screenHeight / 2 )
+        } else {
+            layout.itemSize = CGSize(width: (screenWidth / 2) - (cellSpcing / 2.0 ), height: screenHeight / 3)
+        }
         layout.minimumInteritemSpacing = 5
         layout.minimumLineSpacing = 5
         return layout
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        print(#function)
-        if searchBar.text?.trimmingCharacters(in: .whitespaces).count != 0 {
-            searchItem = searchBar.text!
-            print(searchItem!)
-        }
-        if searchItem != nil {
+        guard let text = searchBar.text else { return }
+        
+        if text.trimmingCharacters(in: .whitespaces).count != 0 && searchItem != text {
+            dataList.removeAll()
+            collectionView.scrollsToTop = true
+            searchItem = text
             callRequest()
         }
+        
         view.endEditing(true)
     }
     
     func callRequest() {
-        NetworkManager.shared.callSearchAPI(searchItem!, page) { value in
+        guard let searchItem else { return }
+        NetworkManager.shared.callSearchAPI(searchItem, page, sortType) { value in
             if value.total == 0 { self.dataList.removeAll() }
             if value.total_pages == self.page { self.isEnd = true }
             if self.page == 1 {
                 self.dataList.removeAll()
             }
             self.dataList.append(contentsOf: value.results)
+            self.collectionView.collectionViewLayout = self.createCollectionLayout()
             self.collectionView.reloadData()
         }
     }
