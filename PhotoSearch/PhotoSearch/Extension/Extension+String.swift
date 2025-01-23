@@ -6,9 +6,3 @@
 //
 
 import Foundation
-
-extension String {
-    func queryAdd(searchItem: String, page: String, order: SearchSort) -> String {
-        return self + "query=\(searchItem)&page=\(page)&per_page=20&order_by=\(order.query)&client_id=\(APIKey.search.value)"
-    }
-}

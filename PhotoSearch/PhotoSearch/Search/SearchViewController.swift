@@ -71,7 +71,7 @@ final class SearchViewController: BaseViewController, UISearchBarDelegate {
     
     @objc func sortButtonTapped(_ sender: UIButton) {
         dataList.removeAll() // 소팅 버튼, search textfield 검색 => removeAll, callRequest, callRequest collectionView.scrollsTotop,
-        callRequest() // 버튼 바꾸기
+        callSearchRequest() // 버튼 바꾸기
         isRecent.toggle()
         changeButtonStyle()
         collectionView.scrollsToTop = true
@@ -105,15 +105,17 @@ final class SearchViewController: BaseViewController, UISearchBarDelegate {
             dataList.removeAll()
             collectionView.scrollsToTop = true
             searchItem = text
-            callRequest()
+            callSearchRequest()
         }
         
         view.endEditing(true)
     }
     
-    func callRequest() {
+    func callSearchRequest() {
         guard let searchItem else { return }
-        NetworkManager.shared.callSearchAPI(searchItem, page, sortType) { value in
+        let url = API.search.url + API.search.queryParams(from: SearchQueryParams(item: searchItem, page: page, order: sortType))
+        
+        NetworkManager.shared.callAPI(to: url) { (value: SearchData) in
             if value.total == 0 { self.dataList.removeAll() }
             if value.total_pages == self.page { self.isEnd = true }
             if self.page == 1 {
@@ -147,10 +149,9 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print(self.dataList[indexPath.item].id)
         let dataID = self.dataList[indexPath.item].id
-        let detailVC = DetailViewController()
-        detailVC.id = dataID
+        callSearchRequest()// data 받아오기 전달. ->
+        let detailVC = DetailViewController(id: dataID)
         navigationController?.pushViewController(detailVC, animated: true)
     }
 }
@@ -161,7 +162,7 @@ extension SearchViewController: UICollectionViewDataSourcePrefetching {
         for item in indexPaths {
             if !isEnd && item.row == dataList.count - 2 {
                 page += 1
-                callRequest()
+                callSearchRequest()
             }
         }
     }
