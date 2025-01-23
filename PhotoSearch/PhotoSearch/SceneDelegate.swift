@@ -17,9 +17,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: scene) // 빈 유리판
         let tab = UITabBarController()
-        let view01 = ViewController()
+        let view01 = UINavigationController(rootViewController: SearchViewController())
         let view02 = TopicViewController()
-//        let nav = UINavigationController(rootViewController: ViewController())
+        
         window?.rootViewController = tab
         tab.setViewControllers([view01, view02], animated: true)
         view01.tabBarItem = UITabBarItem(title: "첫 번째 아이템", image: UIImage(named: "img.png"), tag: 0)

@@ -10,7 +10,7 @@ import Alamofire
 import SnapKit
 import Kingfisher
 
-final class ViewController: BaseViewController, UISearchBarDelegate {
+final class SearchViewController: BaseViewController, UISearchBarDelegate {
     
     let searchBar = UISearchBar()
     let sortButton = UIButton()
@@ -127,7 +127,7 @@ final class ViewController: BaseViewController, UISearchBarDelegate {
     
 }
 
-extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         self.dataList.isEmpty ? 1 : self.dataList.count
     }
@@ -145,10 +145,18 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
             return cell
         }
     }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print(self.dataList[indexPath.item].id)
+        let dataID = self.dataList[indexPath.item].id
+        let detailVC = DetailViewController()
+        detailVC.id = dataID
+        navigationController?.pushViewController(detailVC, animated: true)
+    }
 }
 
 
-extension ViewController: UICollectionViewDataSourcePrefetching {
+extension SearchViewController: UICollectionViewDataSourcePrefetching {
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         for item in indexPaths {
             if !isEnd && item.row == dataList.count - 2 {
