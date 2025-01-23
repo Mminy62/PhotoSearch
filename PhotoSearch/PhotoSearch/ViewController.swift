@@ -10,7 +10,7 @@ import Alamofire
 import SnapKit
 import Kingfisher
 
-class ViewController: BaseViewController, UISearchBarDelegate {
+final class ViewController: BaseViewController, UISearchBarDelegate {
     
     let searchBar = UISearchBar()
     let sortButton = UIButton()
@@ -70,12 +70,16 @@ class ViewController: BaseViewController, UISearchBarDelegate {
     }
     
     @objc func sortButtonTapped(_ sender: UIButton) {
-        dataList.removeAll()
-        callRequest()
+        dataList.removeAll() // 소팅 버튼, search textfield 검색 => removeAll, callRequest, callRequest collectionView.scrollsTotop,
+        callRequest() // 버튼 바꾸기
         isRecent.toggle()
+        changeButtonStyle()
+        collectionView.scrollsToTop = true
+    }
+    
+    func changeButtonStyle() {
         sortType = isRecent ? .latest : .accurate
         sortButton.setTitle(sortType.title, for: .normal)
-        collectionView.scrollsToTop = true
     }
     
     func createCollectionLayout() -> UICollectionViewFlowLayout {

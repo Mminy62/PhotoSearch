@@ -14,7 +14,7 @@ class NetworkManager {
     private init() { }
 
     func callSearchAPI(_ searchItem: String, _ page: Int, _ sortType: SearchSort, completionHandler: @escaping (SearchData) -> ()) {
-        let url = "https://api.unsplash.com/search/photos?query=\(searchItem)&page=\(page)&per_page=20&order_by=\(sortType.query)&client_id=\(APIKey.search.value)"
+        let url = API.search.url.queryAdd(searchItem: searchItem, page: String(page), order: sortType)
         
         AF.request(url, method: .get)
             .responseDecodable(of: SearchData.self) { response in
