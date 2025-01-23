@@ -127,6 +127,14 @@ final class SearchViewController: BaseViewController, UISearchBarDelegate {
         }
     }
     
+    func callStaticsRequest(id: String) {
+        let url = API.statics.url + API.statics.queryParams(from: StaticsQueryParams(imageID: id))
+        
+        NetworkManager.shared.callAPI(to: url) { (value: StaticsData) in
+            dump(value)
+        }
+    }
+    
 }
 
 extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSource {
@@ -149,8 +157,9 @@ extension SearchViewController: UICollectionViewDelegate, UICollectionViewDataSo
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if self.dataList.isEmpty { return }
         let dataID = self.dataList[indexPath.item].id
-        callSearchRequest()// data 받아오기 전달. ->
+        callStaticsRequest(id: dataID)
         let detailVC = DetailViewController(id: dataID)
         navigationController?.pushViewController(detailVC, animated: true)
     }
